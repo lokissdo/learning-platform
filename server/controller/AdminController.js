@@ -39,7 +39,6 @@ class AdminController {
     //     })
     // }
     // async deletePartner(req, res, next) {
-
     //     if (!req.body.userId) {
     //         res.status(400).json({
     //             error: 'Invalid partner to delete'
