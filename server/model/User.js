@@ -1,47 +1,43 @@
-// const mongoose = require('mongoose');
-// const { UserRoleEnum } = require('../constants/Enum')
-// const Schema = mongoose.Schema;
-// const user = new Schema(
-//     {
-//         _id: mongoose.Types.ObjectId,
-//         email: {
-//             type: String,
-//             unique: true,
-//             required: true
-//         },
-        
-//         password: {
-//             type: String,
-//             required: true
-//         },
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum");
 
-//         name: {
-//             type: String,
-//             required: true
-//         },
+const User = new Schema({
+    _id: mongoose.Types.ObjectId,
+    userName: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    email: {
+        type: String,
+        unique: true,
+    },
+    walletAccount: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    joinedDate: {
+        type: Date,
+        default: Date.now,
+        required: true
+    },
+    role: {
+        type: [Number],
+        enum: Object.values(UserRoleEnum),
+        default: [UserRoleEnum.member],
+    },
+    status: {
+        type: Number,
+        enum: Object.values(UserStatusEnum),
+        default: UserStatusEnum.tempSuspended
+    }
+});
 
-//         address: {
-//             type: String,
-//             required: true
-//         },
+User.statics.isLecturer = async function(id) {
+    const user = await this.findOne({_id: id, role: UserRoleEnum.lecturer});
+    return user !== null;
+}
 
-//         address2: {
-//             type: String,
-//             required: true
-//         },
-
-//         phone: {
-//             type: String,
-//             required: true
-//         },
-
-//         role: {
-//             type: Number,
-//             enum: Object.values(UserRoleEnum),
-//             default: UserRoleEnum.contributor 
-//         },
-
-//         date: { type: Date, default: Date.now }
-//     }
-// );
-// module.exports = mongoose.model('User', user)
+module.exports = mongoose.model("User", User);
