@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum");
 
-const User = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     userName: {
         type: String,
@@ -18,7 +18,7 @@ const User = new mongoose.Schema({
         unique: true,
         required: true
     },
-    joinedDate: {
+    createdDate: {
         type: Date,
         default: Date.now,
         required: true
@@ -35,9 +35,9 @@ const User = new mongoose.Schema({
     }
 });
 
-User.statics.isLecturer = async function(id) {
+UserSchema.statics.isLecturer = async function(id) {
     const user = await this.findOne({_id: id, role: UserRoleEnum.lecturer});
     return user !== null;
 }
 
-module.exports = mongoose.model("User", User);
+module.exports = mongoose.model("User", UserSchema);

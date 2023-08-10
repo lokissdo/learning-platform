@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
-
 const User = require("../model/User.js");
+const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum.js");
 
 const UserController = {
-    async addUser(req, res, next) {
+    // Add a user to database
+    addUser: async (req, res, next) => {
         const userName = req.body.userName;
 
-        // Check required fields
-        if (!req.body.email || !req.body.walletAccount) {
+        if (!req.body.userName || !req.body.email || !req.body.walletAccount) {
             next({
                 invalidFields: true,
                 message: "Missing fields"
@@ -15,7 +15,6 @@ const UserController = {
             return;
         }
 
-        // Check existing user name
         const existing = await User.findOne({ userName: userName });
         if (existing) {
             res.status(401);
@@ -31,8 +30,11 @@ const UserController = {
             _id: new mongoose.Types.ObjectId,
             userName: userName,
             email: req.body.email,
-            walletAccount: req.body.walletAccount
-        })
+            walletAccount: req.body.walletAccount,
+            createdDate: new Date(),
+            role: UserRoleEnum.member,
+            status: UserStatusEnum.active
+        });
         
         try {
             await newUser.save();
@@ -41,7 +43,7 @@ const UserController = {
                 success: false,
                 isDuplicated: true,
                 message: "User insertion failed.",
-                error: err,
+                error: err
             });
             return;
         }
@@ -50,6 +52,56 @@ const UserController = {
             message: "successfully",
             user: newUser
         });
+    },
+
+    // Get details from query
+    getDetails: async (req, res, next) => {
+        if (req.body.email || walletAccount) {
+            next({
+                invalidFields: true,
+                message: "Querying user details by email or MetaMask address is prohibited."
+            })
+            return;
+        }
+
+        try {
+            const details = await User.find(req.body).select("userName createdDate role status -_id");
+            res.status(200).json({
+                success: true,
+                accountDetails: details
+            })
+        } catch (err) {
+            next({
+                success: false,
+                message: "Couldn't find user name",
+                error: err
+            });
+            return;
+        };
+    },
+
+    getUserNameFromId: async (req, res, next) => {
+        if (!req.body.id) {
+            next({
+                invalidFields: true,
+                message: "Missing ID"
+            });
+        }
+
+        try {
+            const userName = await User.findOne({_id: req.body.id}).select("userName");
+            res.status(200).json({
+                success: true,
+                userName: userName
+            });
+        } catch (err) {
+            next({
+                success: false,
+                message: "Couldn't find user name",
+                error: err
+            })
+            return;
+        }
     }
 }
 

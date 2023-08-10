@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const { Course } = require("./Course");
+const Course = require("./Course");
 
-const CourseQuestion = new mongoose.Schema({
+const QuestionSchema = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     courseId: {
         type: mongoose.Types.ObjectId,
@@ -29,4 +29,4 @@ const CourseQuestion = new mongoose.Schema({
     }
 });
 
-module.exports = { CourseQuestion };
+module.exports = mongoose.model("Question", QuestionSchema);
