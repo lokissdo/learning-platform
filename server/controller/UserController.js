@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const User = require("../model/User.js");
 
-class AdminController {
+const UserController = {
     async addUser(req, res, next) {
         const userName = req.body.userName;
 
@@ -30,7 +30,27 @@ class AdminController {
         const newUser = new User({
             _id: new mongoose.Types.ObjectId,
             userName: userName,
-            email: req.body.email
+            email: req.body.email,
+            walletAccount: req.body.walletAccount
         })
+        
+        try {
+            await newUser.save();
+        } catch (err) {
+            next({
+                success: false,
+                isDuplicated: true,
+                message: "User insertion failed.",
+                error: err,
+            });
+            return;
+        }
+        res.send({
+            success: true,
+            message: "successfully",
+            user: newUser
+        });
     }
 }
+
+module.exports = UserController;

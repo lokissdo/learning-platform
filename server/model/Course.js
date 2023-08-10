@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { User } = require("./User");
 
-const Course = new Schema({
+const Course = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     courseName: String,
     lecturer: {
@@ -34,5 +34,10 @@ const Course = new Schema({
         }
     }    
 });
+
+Course.statics.isExistingCourse = async function(id) {
+    const course = await this.findOne({ _id: id });
+    return (course !== null);
+}
 
 module.exports = { Course };

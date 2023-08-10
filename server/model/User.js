@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum");
 
-const User = new Schema({
+const User = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     userName: {
         type: String,
