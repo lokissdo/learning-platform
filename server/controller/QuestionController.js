@@ -96,7 +96,10 @@ const QuestionController = {
 
         try {
             const correctAnswer = await Question.findOne({_id: req.body.id}).select("content.answer -_id");
-            return correctAnswer.localeCompare(req.body.answer) === 0; 
+            res.send({
+                success: true,
+                verification: correctAnswer.content.answer === req.body.answer
+            });
         } catch (err) {
             next({
                 success: false,
