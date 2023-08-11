@@ -9,4 +9,13 @@ const UserStatusEnum = {
     active: 0
 };
 
-module.exports = { UserRoleEnum, UserStatusEnum };
+const DifficultyEnum = {
+    remember: 1,
+    understand: 2,
+    apply: 3,
+    analyze: 4,
+    evaluate: 5,
+    create: 6
+};
+
+module.exports = { UserRoleEnum, UserStatusEnum, DifficultyEnum };

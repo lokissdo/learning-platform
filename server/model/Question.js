@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Course = require("./Course");
+const { DifficultyEnum } = require("../constants/Enum");
 
 const QuestionSchema = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
@@ -14,14 +15,16 @@ const QuestionSchema = new mongoose.Schema({
             }
         }
     },
-    question: {
-        type: String
-    },
-    externalResources: {
-        type: [String]
-    },
-    answer: {
-        type: String
+    content: {
+        question: {
+            type: String,
+            required: true
+        },
+        options: [String],
+        answer: {
+            type: String,
+            required: true
+        }
     },
     difficulty: {
         type: Number,
