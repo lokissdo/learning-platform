@@ -1,5 +1,7 @@
 const tokenHelper = require('../helper/Token')
 const { UserRoleEnum } = require('../constants/Enum')
+const ethUtil = require('ethereumjs-util');
+
 var AuthMiddleware = {
     // authorizeUser: function(req, res, next, role) {
     //     data = tokenHelper.getDataFromToken(req.cookies.token)
@@ -24,6 +26,17 @@ var AuthMiddleware = {
     // isAdmin: (req, res, next) => {
     //     AuthMiddleware.authorizeUser(req,res,next,UserRoleEnum.admin)
     // }
+     verifySignature(message, signature, address) {
+        const messageHash = ethUtil.hashPersonalMessage(Buffer.from(message));
+        const signatureBuffer = ethUtil.toBuffer(signature);
+        const addressBuffer = ethUtil.toBuffer(address);
+        
+        const recoveredAddress = ethUtil.bufferToHex(ethUtil.pubToAddress(
+          ethUtil.ecrecover(messageHash, signatureBuffer.slice(0, 32), signatureBuffer.slice(32, 64), 27)
+        ));
+        
+        return address.toLowerCase() === recoveredAddress.toLowerCase();
+      }
 }
 
 module.exports = AuthMiddleware
