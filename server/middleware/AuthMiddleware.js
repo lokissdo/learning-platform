@@ -1,5 +1,5 @@
 const tokenHelper = require('../helper/Token')
-const { UserRoleEnum } = require('../constants/Enum')
+const { UserRoleEnum } = require('../constants/Enum_old')
 var AuthMiddleware = {
     // authorizeUser: function(req, res, next, role) {
     //     data = tokenHelper.getDataFromToken(req.cookies.token)

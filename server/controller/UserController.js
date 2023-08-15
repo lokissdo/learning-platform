@@ -1,149 +1,108 @@
-const mongoose = require('mongoose')
-// const User = require('../model/User.js');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-// const Campaign = require("../model/Campaign");
-// const PointController = require('./PointController.js');
-class UserController {
+const mongoose = require("mongoose");
+const User = require("../model/User.js");
+const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum.js");
 
-    //viewALLCampaign
-    // async viewAllCampaign(req, res, next) {
-    //     try {
-    //         const campaigns = await Campaign.find();
-    //         res.status(200).json(
-    //             {
-    //                 success: true,
-    //                 campaigns: campaigns
-    //             }
-    //         )
-    //     } catch (error) {
-    //         res.status(500).json({
-    //             success: false,
-    //             error: error
-    //         })
-    //     }
-    // }
+const UserController = {
+    // Add a user to database
+    addUser: async (req, res, next) => {
+        const userName = req.body.userName;
 
-    // async creatNewAccount(req, res, next) {
-    //     // Check cheater
-    //     if (!req.body.email || !req.body.password || !req.body.address || !req.body.phone || !req.body.address2 || !req.body.name) {
-    //         console.log(req.body)
-    //         next({
-    //             invalidFields: true,
-    //             message: "Invalid fields"
-    //         })
-    //         return;
-    //     }
-    //     let hashedPassword
-    //     try {
-    //         let saltRounds = 10;
-    //         hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+        if (!req.body.userName || !req.body.email || !req.body.walletAccount) {
+            next({
+                invalidFields: true,
+                message: "Missing fields"
+            })
+            return;
+        }
 
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-    //     const newUser = new User({
-    //         _id: new mongoose.Types.ObjectId(),
-    //         email: req.body.email,
-    //         name: req.body.name,
-    //         password: hashedPassword,
-    //         address2: req.body.address2,
-    //         address: req.body.address,
-    //         phone: req.body.phone,
-    //         // role: req.body.role,
-    //     })
+        const existing = await User.findOne({ userName: userName });
+        if (existing) {
+            res.status(401);
+            res.json({
+                message: "User name already exists",
+                inValid: true,
+                success: false
+            })
+            return;
+        }
 
-    //     console.log(newUser);
-    //     try {
-    //         await newUser.save();
-    //     } catch (err) {
-    //         next({
-    //             success: false,
-    //             isDuplicated: true,
-    //             message: "Email has existed",
-    //             error: err,
-    //         });
-    //         return;
-    //     }
-    //     res.send({
-    //         success: true,
-    //         message: "sucessfully",
-    //         user: newUser
-    //     });
-    // }
+        const newUser = new User({
+            _id: new mongoose.Types.ObjectId,
+            userName: userName,
+            email: req.body.email,
+            walletAccount: req.body.walletAccount,
+            createdDate: new Date(),
+            role: UserRoleEnum.member,
+            status: UserStatusEnum.active
+        });
+        
+        try {
+            await newUser.save();
+        } catch (err) {
+            next({
+                success: false,
+                isDuplicated: true,
+                message: "User insertion failed.",
+                error: err
+            });
+            return;
+        }
+        res.send({
+            success: true,
+            message: "successfully",
+            user: newUser
+        });
+    },
 
-    // async verifyAccount(req, res, next) {
-    //     if (!req.body.email || !req.body.password) {
-    //         next({
-    //             success: false,
-    //             message: "Invalid fields",
-    //             invalidFields: true
-    //         })
-    //         return;
-    //     }
-    //     const user = await User.findOne({ email: req.body.email })
+    // Get details from query
+    getDetails: async (req, res, next) => {
+        if (req.body.email || walletAccount) {
+            next({
+                invalidFields: true,
+                message: "Querying user details by email or MetaMask address is prohibited."
+            })
+            return;
+        }
 
-    //     console.log(user);
-    //     if (user) {
-    //         try {
-    //             let check = await bcrypt.compare(req.body.password, user.password)
-    //             if (check) {
-    //                 const token = jwt.sign({
-    //                     user: {
-    //                         email: user.email,
-    //                         userId: user._id,
-    //                         address2: user.address2,
-    //                         address: user.address,
-    //                         role: user.role
-    //                     },
-    //                 },
-    //                     process.env.SECRET_KEY_TOKEN,
-    //                     {
-    //                         expiresIn: "80h"
-    //                     }
-    //                 );
-    //                 res.cookie('token', token, {
-    //                     expires: new Date(Date.now() + 80 * 3600)
-    //                 })
-    //                 res.send({
-    //                     success: true,
-    //                     message: "sucessfully",
-    //                     user: user
-    //                 })
-    //             }
-    //             else {
-    //                 res.send({
-    //                     success: false,
-    //                     message: "wrong information",
-    //                     wrongInformation: true,
-    //                 });
-    //                 return;
-    //             }
-    //         } catch (err) {
-    //             next(err);
-    //             return;
-    //         }
-    //     }
-    //     else {
-    //         res.send({ success: false, message: "Wrong information" });
-    //         return;
-    //     }
-    // }
-    // async getTop8Point(req, res, next) {
-    //     try {
-    //         const data = await PointController.getTop8HiestPoint();
-    //         res.status(200).json({
-    //             success: true,
-    //             data: data
-    //         })
-    //     }catch(e){
-    //         res.status(400).json({
-    //             success: false,
-    //             err: e
-    //         })
-    //     }
-    // }
+        try {
+            const details = await User.find(req.body).select("userName createdDate role status -_id");
+            res.status(200).json({
+                success: true,
+                accountDetails: details
+            })
+        } catch (err) {
+            next({
+                success: false,
+                message: "Couldn't find user name",
+                error: err
+            });
+            return;
+        };
+    },
 
+    getUserNameFromId: async (req, res, next) => {
+        if (!req.body.id) {
+            next({
+                invalidFields: true,
+                message: "Missing ID"
+            });
+        }
 
+        try {
+            const userName = await User.findOne({_id: req.body.id}).select("userName");
+            res.status(200).json({
+                success: true,
+                userName: userName
+            });
+        } catch (err) {
+            next({
+                success: false,
+                message: "Couldn't find user name",
+                error: err
+            })
+            return;
+        }
+    }
 }
-module.exports = new UserController;
+
+module.exports = UserController;
