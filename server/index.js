@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 3001;
 app.use(bodyParser.json({limit:"50mb"}));
 app.use(morgan('combined'));
 app.use(cors());  //avoid "cors" error
+
 app.use("/api",router);
 
 
