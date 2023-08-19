@@ -9,7 +9,7 @@ const CourseController = {
                 invalidFields: true,
                 message: "Missing fields."
             });
-            return;
+            return false;
         }
 
         const newCourse = new Course({
@@ -27,13 +27,14 @@ const CourseController = {
                 message: "Course insertion failed.",
                 error: err
             });
-            return;
+            return false;
         }
         res.send({
             success: true,
             message: "successfully",
             course: newCourse
         });
+        return true
     },
 
     getDetails: async (req, res, next) => {

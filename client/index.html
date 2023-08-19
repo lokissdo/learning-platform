@@ -1,0 +1,171 @@
+<!-- <html>
+
+<head>
+  <title>Web3 Metamask Login</title>
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.ethers.io/dist/ethers.min.js"></script>
+</head>
+
+<body class="flex w-screen h-screen justify-center items-center">
+  <div class="flex-col space-y-2 justify-center items-center">
+    <button id='loginButton' onclick="" class="mx-auto rounded-md p-2 bg-purple-500 text-white">
+      Login with MetaMask
+    </button>
+    <button id='buyCourse' onclick="" class="mx-auto rounded-md p-2 bg-purple-500 text-white">
+      Buy Course
+    </button>
+    <p id='userWallet' class='text-lg text-gray-600 my-2'></p>
+  </div>
+<script src="transaction.js"> </script>
+<script src="CourseOpeningContract.js">
+
+</script>
+  <script>
+
+    
+    window.userWalletAddress = null
+    const loginButton = document.getElementById('loginButton')
+    const userWallet = document.getElementById('userWallet')
+    const buyCourse = document.getElementById('buyCourse')
+    buyCourse.onclick = () => {
+      // Check if MetaMask is installed and connected
+      if (window.ethereum) {
+        const ethereum = window.ethereum;
+        
+        // Request user's permission to connect
+        ethereum.enable().then((accounts) => {
+          const userAddress = accounts[0];
+
+          // Now you can initiate a transaction and request approval
+          // For example, using web3.js
+          const web3 = new Web3(ethereum);
+          const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+          contract.methods.someMethod().send({ from: userAddress })
+            .on('transactionHash', (hash) => {
+              // Transaction hash
+            })
+            .on('confirmation', (confirmationNumber, receipt) => {
+              // Transaction confirmed
+            })
+            .on('error', (error) => {
+              // Transaction error
+            });
+        });
+      } else {
+        // MetaMask is not available
+      }
+
+    }
+    function toggleButton() {
+      if (!window.ethereum) {
+        loginButton.innerText = 'MetaMask is not installed'
+        loginButton.classList.remove('bg-purple-500', 'text-white')
+        loginButton.classList.add('bg-gray-500', 'text-gray-100', 'cursor-not-allowed')
+        return false
+      }
+
+      loginButton.addEventListener('click', loginWithMetaMask)
+    }
+
+    async function loginWithMetaMask() {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+        .catch((e) => {
+          console.error(e.message)
+          return
+        })
+      if (!accounts) { return }
+
+      window.userWalletAddress = accounts[0]
+      userWallet.innerText = window.userWalletAddress
+      loginButton.innerText = 'Sign out of MetaMask'
+
+      loginButton.removeEventListener('click', loginWithMetaMask)
+      setTimeout(() => {
+        loginButton.addEventListener('click', signOutOfMetaMask)
+      }, 200)
+    }
+
+    function signOutOfMetaMask() {
+      window.userWalletAddress = null
+      userWallet.innerText = ''
+      loginButton.innerText = 'Sign in with MetaMask'
+
+      loginButton.removeEventListener('click', signOutOfMetaMask)
+      setTimeout(() => {
+        loginButton.addEventListener('click', loginWithMetaMask)
+      }, 200)
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      toggleButton()
+    });
+  </script>
+</body>
+
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaMask Transaction Example</title>
+</head>
+<body>
+  <!-- <script src="https://cdn.ethers.io/dist/ethers.min.js"></script> -->
+  <script src="CourseOpeningContract.js"></script>
+  <!-- <script type="module">
+    import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+    // Your code here...
+</script> -->
+<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+
+  <script>
+    // Replace this with your contract's ABI and address
+
+
+    // Connect to the Ethereum network using MetaMask's provider
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // const provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com');
+    // Create a contract instance
+    const contract = new ethers.Contract(courseOpeningContractAddress, courseOpeningContractABI, provider);
+
+    async function sendTransaction() {
+      try {
+        // Request user's permission to connect to their MetaMask account
+        await window.ethereum.enable();
+
+        // Get the signer (user's Ethereum account)
+        const signer = provider.getSigner();
+        
+        // Replace 'yourFunctionName' and 'functionArguments' with actual values
+        const functionName = 'buyCourse';
+        const functionArguments = [Number(125)]; // Your function arguments
+        let ids = await contract.getAllCourseIDs()
+        console.log(ids)
+        // Encode the transaction data
+        // const txData = contract.interface.encodeFunctionData(functionName, functionArguments);
+        const txData =  contract.interface.encodeFunctionData('buyCourse', [125]);
+        console.log(contract)
+
+
+        // Create the transaction object
+        const tx = {
+          to: courseOpeningContractAddress,
+          data: txData,
+          value:1233
+        };
+
+        // Send the transaction and wait for the result
+        const txResponse = await signer.sendTransaction(tx);
+        console.log('Transaction sent:', txResponse);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  </script>
+  <button onclick="sendTransaction()">Send Transaction</button>
+</body>
+</html>

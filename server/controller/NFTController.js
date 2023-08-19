@@ -50,6 +50,7 @@ const NFTController = {
             NFT: newNFT
         });
     }
+    
 }
 
 module.exports = NFTController;

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../model/User.js");
 const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum.js");
+const Signature = require("../Helper/Signature.js");
 
 const UserController = {
     // Add a user to database
@@ -35,7 +36,7 @@ const UserController = {
             role: UserRoleEnum.member,
             status: UserStatusEnum.active
         });
-        
+
         try {
             await newUser.save();
         } catch (err) {
@@ -89,7 +90,7 @@ const UserController = {
         }
 
         try {
-            const userName = await User.findOne({_id: req.body.id}).select("userName");
+            const userName = await User.findOne({ _id: req.body.id }).select("userName");
             res.status(200).json({
                 success: true,
                 userName: userName
@@ -102,6 +103,66 @@ const UserController = {
             })
             return;
         }
+    },
+
+    async login(req, res, next) {
+        if (!req.body.address || !req.body.message || !req.body.signature) {
+            next({
+                success: false,
+                message: "Invalid fields",
+                invalidFields: true
+            })
+            return;
+        }
+        if (!Signature.verify(req.body.address, req.body.message, req.body.signature)) {
+            next({
+                success: false,
+                message: "Signature not valid",
+            })
+            return;
+        }
+        const user = await User.findOne({ walletAccount: req.body.address })
+
+        console.log(user);
+        if (!user) {
+            res.send({ success: false, message: "You need to signup first" });
+            return
+        }
+        try {
+            let check = await bcrypt.compare(req.body.password, user.password)
+            if (!check) {
+                res.send({
+                    success: false,
+                    message: "wrong information",
+                    wrongInformation: true,
+                });
+                return
+            }
+            const token = jwt.sign({
+                user: {
+                    email: user.email,
+                    userId: user._id,
+                    address: user.walletAccount,
+                    role: user.role
+                },
+            },
+                process.env.SECRET_KEY_TOKEN,
+                {
+                    expiresIn: "80h"
+                }
+            );
+            res.cookie('token', token, {
+                expires: new Date(Date.now() + 80 * 3600)
+            })
+            res.send({
+                success: true,
+                message: "sucessfully",
+                user: user
+            })
+        } catch (err) {
+            next(err);
+        }
+        return;
     }
 }
 
