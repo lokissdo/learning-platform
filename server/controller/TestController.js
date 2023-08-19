@@ -1,4 +1,5 @@
 const Transaction = require("../Helper/Transaction");
+const TransactionForCert = require("../Helper/TransactionForCert");
 const Question = require("../model/Question");
 const CourseController = require("./CourseController");
 const NFTController = require("./NFTController");
@@ -145,6 +146,7 @@ class TestController {
             success: true
         })
     }
+
     async showFunds(req, res, next) {
 
         const functionName = 'showFunds'; // Replace with the name of the function you want to call
@@ -164,7 +166,7 @@ class TestController {
     async mintBatch(req, res, next) {
 
         const functionName = 'mintBatch'; // Replace with the name of the function you want to call
-        const functionArguments = [10]; // Replace with the arguments for the function
+        const functionArguments = [1]; // Replace with the arguments for the function
         console.log('hwre')
         let result = await Transaction.runWritingFunction(functionName, functionArguments)
         res.json({
@@ -202,9 +204,75 @@ class TestController {
     }
     async getURIToken(req, res, next) {
         const functionName = 'tokenURI'; // Replace with the name of the function you want to call
-        const functionArguments = [1]; // Replace with the arguments for the function
+        const functionArguments = [0]; // Replace with the arguments for the function
 
         let result = await Transaction.runReadingFunction(functionName, functionArguments)
+        result = JSON.parse(JSON.stringify(result, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value
+        ));
+        res.json({
+            message: '....',
+            res: result,
+            success: true
+        })
+    }
+
+
+
+    // CertNFT
+    async mintCert(req,res,next){
+           
+        // const functionName = 'ownsNFTForCourse'; // Replace with the name of the function you want to call
+        // const functionArguments = [req.user.address, req.params.courseID]; // Replace with the arguments for the function
+
+        // let isAllowedToLearn = await Transaction.runReadingFunction(functionName, functionArguments)
+        // isAllowedToLearn = JSON.parse(JSON.stringify(isAllowedToLearn, (key, value) =>
+        //     typeof value === "bigint" ? value.toString() : value
+        // ));
+        // if (!isAllowedToLearn) {
+        //     res.json({
+        //         message: 'Not permission to learn this course',
+        //         res: result,
+        //         success: false
+        //     })
+        //     return
+        // }
+        const functionNameForMintCert = 'mintCertNFT'; // Replace with the name of the function you want to call
+        const functionArgumentsForMintCert = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9',Number(req.params.courseId)]; // Replace with the arguments for the function
+
+        let result = await TransactionForCert.runWritingFunction(functionNameForMintCert, functionArgumentsForMintCert)
+        result = JSON.parse(JSON.stringify(result, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value
+        ));
+        res.json({
+            message: '....',
+            res: result,
+            success: true
+        })
+    }
+
+
+    async ownsCertNFTForCourse(req, res, next) {
+     
+
+        const functionName = 'ownsCertNFTForCourse'; // Replace with the name of the function you want to call
+        const functionArguments = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9', 125]; // Replace with the arguments for the function
+
+        let result = await TransactionForCert.runReadingFunction(functionName, functionArguments)
+        result = JSON.parse(JSON.stringify(result, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value
+        ));
+        res.json({
+            message: '....',
+            res: result,
+            success: true
+        })
+    }
+    async getURITokenforCertNFT(req, res, next) {
+        const functionName = 'tokenURI'; // Replace with the name of the function you want to call
+        const functionArguments = [0]; // Replace with the arguments for the function
+
+        let result = await TransactionForCert.runReadingFunction(functionName, functionArguments)
         result = JSON.parse(JSON.stringify(result, (key, value) =>
             typeof value === "bigint" ? value.toString() : value
         ));

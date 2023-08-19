@@ -20,7 +20,8 @@ router.get('/check_owner',testController.ownsNFTForCourse)
 router.get('/fund_contract',testController.fundContract)
 router.get('/withdraw_contract',testController.withDrawContract)
 router.get('/get_tokenURI',testController.getURIToken)
-router.get('/get_questions/:courseId',testController.get_data_for_game)
+router.get('/get_questions/:courseID',testController.get_data_for_game)
+router.get('/mint_cert/:courseID',testController.mintCert)
 
 
 module.exports = router
