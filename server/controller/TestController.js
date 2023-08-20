@@ -20,7 +20,7 @@ class TestController {
         // const isValidCourse = CourseController.addCourse(req,res,next);
         // if(!isValidCourse) return;
         const course = {
-            courseID: Number(125),
+            courseID: '123',
             price: Number(3000), // Example price in wei (1 ether)
         };
 
@@ -82,12 +82,20 @@ class TestController {
     async buyCourse(req, res, next) {
 
         const functionName = 'buyCourse'; // Replace with the name of the function you want to call
-        const functionArguments = [125]; // Replace with the arguments for the function
+        const functionArguments = ['123']; // Replace with the arguments for the function
         console.log('hwre')
         let result = await Transaction.runWritingFunction(functionName, functionArguments, 3000)
+        const inputs = [
+            { type: "string", name: "courseID" },
+            { type: "address", name: "buyer", indexed: true },
+            { type: "uint256", name: "price" },
+            { type: "uint256", name: "tokenID" }
+        ];
+        let eventDataForMint = await Transaction.getEventDataFromTransactionHash(result.transactionHash, "CourseBought(string,address,uint256,uint256)", inputs)
+        console.log(eventDataForMint)
         res.json({
             message: '....',
-            res: result,
+            res: eventDataForMint,
             success: true
         })
     }
@@ -216,8 +224,8 @@ class TestController {
 
 
     // CertNFT
-    async mintCert(req,res,next){
-           
+    async mintCert(req, res, next) {
+
         // const functionName = 'ownsNFTForCourse'; // Replace with the name of the function you want to call
         // const functionArguments = [req.user.address, req.params.courseID]; // Replace with the arguments for the function
 
@@ -233,46 +241,68 @@ class TestController {
         //     })
         //     return
         // }
-
-        try{
+        var result
+        try {
             const functionNameForMintCert = 'mintCertNFT'; // Replace with the name of the function you want to call
-            const functionArgumentsForMintCert = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9',Number(req.params.courseId)]; // Replace with the arguments for the function
-    
-            let result = await TransactionForCert.runWritingFunction(functionNameForMintCert, functionArgumentsForMintCert)
+            const functionArgumentsForMintCert = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9', req.params.courseID]; // Replace with the arguments for the function
+            result = await TransactionForCert.runWritingFunction(functionNameForMintCert, functionArgumentsForMintCert)
             result = JSON.parse(JSON.stringify(result, (key, value) =>
                 typeof value === "bigint" ? value.toString() : value
             ));
-    
-    
-            const functionNameForrewardItem = 'rewardItem'; // Replace with the name of the function you want to call
-            const functionArgumentsForrewardItem = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9']; // Replace with the arguments for the function
-    
-    
-            let isRewarded = await Transaction.runWritingFunction(functionNameForrewardItem, functionArgumentsForrewardItem)
+        }
+        catch (err) {
+            console.log(err)
+            result = false
+        }
+
+        const functionNameForrewardItem = 'rewardItem'; // Replace with the name of the function you want to call
+        const functionArgumentsForrewardItem = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9']; // Replace with the arguments for the function
+        var isRewarded
+        try {
+            isRewarded = await Transaction.runWritingFunction(functionNameForrewardItem, functionArgumentsForrewardItem)
             isRewarded = JSON.parse(JSON.stringify(isRewarded, (key, value) =>
                 typeof value === "bigint" ? value.toString() : value
             ));
-    
-            res.json({
-                message: '....',
-                res: result,
-                success: true,
-                reward: isRewarded
-            })
         }
-        catch(err){
-            console.log(err)
-            res.json({
-                err
-            })
-            return;
+        catch (err) {
+            isRewarded = err
         }
-      
+        // let eventDataForMint =  TransactionForCert.getEventDataFromTransactionHash(result.transactionHash)
+        // console.log(eventDataForMint)
+        const inputs = [
+            { type: "string", name: "courseID" },
+            { type: "address", name: "owner", indexed: true },
+            { type: "uint256", name: "tokenID" },
+        ];
+        if (result)
+        result = await Transaction.getEventDataFromTransactionHash(result.transactionHash, "NFTMinted(string,address,uint256)", inputs)
+
+        const inputsReward = [
+            { type: "address", name: "to" },
+            { type: "string", name: "courseId", indexed: true },
+            { type: "uint256", name: "tokenId" },
+        ];
+        if (isRewarded)
+        isRewarded = await Transaction.getEventDataFromTransactionHash(isRewarded.transactionHash, "RewardItem(address,string,uint256)", inputsReward)
+        ;
+        
+        // let eventDataForRw =  Transaction.getEventDataFromTransactionHash(isRewarded.transactionHash)
+        // console.log(eventDataForRw)
+
+        res.send({
+            message: '....',
+            certMinted: result,
+            success: true,
+            reward: isRewarded,
+
+        })
+
+
     }
 
 
     async ownsCertNFTForCourse(req, res, next) {
-     
+
 
         const functionName = 'ownsCertNFTForCourse'; // Replace with the name of the function you want to call
         const functionArguments = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9', 125]; // Replace with the arguments for the function
@@ -301,10 +331,10 @@ class TestController {
             success: true
         })
     }
-    async setURIToken(req, res, next){
+    async setURIToken(req, res, next) {
         //check auth
         NFTController.addNFT(req, res, next)
-    } 
+    }
 }
 
 module.exports = new TestController;
