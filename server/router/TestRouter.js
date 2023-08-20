@@ -22,6 +22,7 @@ router.get('/withdraw_contract',testController.withDrawContract)
 router.get('/get_tokenURI',testController.getURIToken)
 router.get('/get_questions/:courseID',testController.get_data_for_game)
 router.get('/mint_cert/:courseID',testController.mintCert)
+router.post('/set_uri',testController.setURIToken)
 
 
 module.exports = router

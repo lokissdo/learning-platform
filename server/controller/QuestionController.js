@@ -84,30 +84,34 @@ const QuestionController = {
             return;
         }
     },
-    async  getRandomQuestions(courseID,numQuestions) {
+    async getRandomQuestions(courseID, numQuestions) {
         try {
-          // Get the total count of questions
-          const totalQuestions = await Question.countDocuments({ courseID });
-      
-          // Generate an array of random indexes
-          const randomIndexes = [];
-          while (randomIndexes.length < numQuestions) {
-            const randomIndex = Math.floor(Math.random() * totalQuestions);
-            if (!randomIndexes.includes(randomIndex)) {
-              randomIndexes.push(randomIndex);
+            // Get the total count of questions
+            const totalQuestions = await Question.countDocuments({ courseID });
+
+            // Generate an array of random indexes
+            const randomIndexes = [];
+            while (randomIndexes.length < numQuestions) {
+                const randomIndex = Math.floor(Math.random() * totalQuestions);
+                if (!randomIndexes.includes(randomIndex)) {
+                    randomIndexes.push(randomIndex);
+                }
             }
-          }
-      
-          // Fetch questions using the random indexes
-          const randomQuestions = await Question.find({ courseID })
-            .skip(randomIndexes)
-            .limit(numQuestions);
-      
-          return randomQuestions;
+
+            // Fetch questions using the random indexes
+            const randomQuestions = await Question.find({ courseID })
+                .skip(randomIndexes)
+                .limit(numQuestions);
+
+            let formattedRes = randomQuestions.map(e => {
+                e.content.answer = e.content.answer.at(0)
+                return e.content
+            });
+            return formattedRes;
         } catch (error) {
-          throw error;
+            throw error;
         }
-      },
+    },
     verifyAnswer: async (req, res, next) => {
         if (!req.body.answer || !req.body.id) {
             next({
@@ -118,7 +122,7 @@ const QuestionController = {
         }
 
         try {
-            const correctAnswer = await Question.findOne({_id: req.body.id}).select("content.answer -_id");
+            const correctAnswer = await Question.findOne({ _id: req.body.id }).select("content.answer -_id");
             res.send({
                 success: true,
                 verification: correctAnswer.content.answer === req.body.answer

@@ -3,7 +3,8 @@ const morgan = require('morgan');
 const cors = require('cors'); //avoid cors error
 const cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser');
-const router = require('./router')
+const APIRouter = require('./router')
+const MetadataRouter = require('./router/MetadataRouter')
 const app = express();
 const path = require('path')
 require("dotenv").config();
@@ -20,7 +21,8 @@ app.use(bodyParser.json({limit:"50mb"}));
 app.use(morgan('combined'));
 app.use(cors());  //avoid "cors" error
 
-app.use("/api",router);
+app.use("/api",APIRouter);
+app.use("/metadata",MetadataRouter);
 
 
 // app.get('*', (req, res) => {

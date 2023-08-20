@@ -5,6 +5,7 @@ const User = require("../model/User");
 
 const NFTController = {
     addNFT: async (req, res, next) => {
+        
         if (!req.body.courseId || !req.body.uri) {
             next({
                 invalidFields: true,
@@ -12,8 +13,14 @@ const NFTController = {
             });
             return;
         }
-
+console.log(req.body)
         const courseDetails = await Course.findOne({_id: req.body.courseId}).exec();
+        if (!courseDetails){
+            res.json({
+                error:'Course does not exist'
+            })
+            return
+        }
         const lecturerId = courseDetails.lecturer;
         const lecturer = []
         for (id of lecturerId) {

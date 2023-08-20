@@ -76,11 +76,7 @@ class TestController {
 
         console.log(req.params)
         let questions = await QuestionController.getRandomQuestions(req.params.courseID, 20)
-        res.json({
-            message: '....',
-            res: questions,
-            success: true
-        })
+        res.json(questions)
     }
 
     async buyCourse(req, res, next) {
@@ -237,18 +233,41 @@ class TestController {
         //     })
         //     return
         // }
-        const functionNameForMintCert = 'mintCertNFT'; // Replace with the name of the function you want to call
-        const functionArgumentsForMintCert = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9',Number(req.params.courseId)]; // Replace with the arguments for the function
 
-        let result = await TransactionForCert.runWritingFunction(functionNameForMintCert, functionArgumentsForMintCert)
-        result = JSON.parse(JSON.stringify(result, (key, value) =>
-            typeof value === "bigint" ? value.toString() : value
-        ));
-        res.json({
-            message: '....',
-            res: result,
-            success: true
-        })
+        try{
+            const functionNameForMintCert = 'mintCertNFT'; // Replace with the name of the function you want to call
+            const functionArgumentsForMintCert = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9',Number(req.params.courseId)]; // Replace with the arguments for the function
+    
+            let result = await TransactionForCert.runWritingFunction(functionNameForMintCert, functionArgumentsForMintCert)
+            result = JSON.parse(JSON.stringify(result, (key, value) =>
+                typeof value === "bigint" ? value.toString() : value
+            ));
+    
+    
+            const functionNameForrewardItem = 'rewardItem'; // Replace with the name of the function you want to call
+            const functionArgumentsForrewardItem = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9']; // Replace with the arguments for the function
+    
+    
+            let isRewarded = await Transaction.runWritingFunction(functionNameForrewardItem, functionArgumentsForrewardItem)
+            isRewarded = JSON.parse(JSON.stringify(isRewarded, (key, value) =>
+                typeof value === "bigint" ? value.toString() : value
+            ));
+    
+            res.json({
+                message: '....',
+                res: result,
+                success: true,
+                reward: isRewarded
+            })
+        }
+        catch(err){
+            console.log(err)
+            res.json({
+                err
+            })
+            return;
+        }
+      
     }
 
 
@@ -282,6 +301,10 @@ class TestController {
             success: true
         })
     }
+    async setURIToken(req, res, next){
+        //check auth
+        NFTController.addNFT(req, res, next)
+    } 
 }
 
 module.exports = new TestController;
