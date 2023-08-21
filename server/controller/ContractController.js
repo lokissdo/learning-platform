@@ -222,25 +222,25 @@ class ContractController {
     // CertNFT
     async mintCert(req, res, next) {
 
-        // const functionName = 'ownsNFTForCourse'; // Replace with the name of the function you want to call
-        // const functionArguments = [req.user.address, req.params.courseID]; // Replace with the arguments for the function
+        const functionName = 'ownsNFTForCourse'; // Replace with the name of the function you want to call
+        const functionArguments = [req.user.address, req.params.courseID]; // Replace with the arguments for the function
 
-        // let isAllowedToLearn = await Transaction.runReadingFunction(functionName, functionArguments)
-        // isAllowedToLearn = JSON.parse(JSON.stringify(isAllowedToLearn, (key, value) =>
-        //     typeof value === "bigint" ? value.toString() : value
-        // ));
-        // if (!isAllowedToLearn) {
-        //     res.json({
-        //         message: 'Not permission to learn this course',
-        //         res: result,
-        //         success: false
-        //     })
-        //     return
-        // }
+        let isAllowedToLearn = await Transaction.runReadingFunction(functionName, functionArguments)
+        isAllowedToLearn = JSON.parse(JSON.stringify(isAllowedToLearn, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value
+        ));
+        if (!isAllowedToLearn) {
+            res.json({
+                message: 'Not permission to learn this course',
+                res: result,
+                success: false
+            })
+            return
+        }
         var result
         try {
             const functionNameForMintCert = 'mintCertNFT'; // Replace with the name of the function you want to call
-            const functionArgumentsForMintCert = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9', req.params.courseID]; // Replace with the arguments for the function
+            const functionArgumentsForMintCert = [req.user.address, req.params.courseID]; // Replace with the arguments for the function
             result = await TransactionForCert.runWritingFunction(functionNameForMintCert, functionArgumentsForMintCert)
             result = JSON.parse(JSON.stringify(result, (key, value) =>
                 typeof value === "bigint" ? value.toString() : value
@@ -252,7 +252,7 @@ class ContractController {
         }
 
         const functionNameForrewardItem = 'rewardItem'; // Replace with the name of the function you want to call
-        const functionArgumentsForrewardItem = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9']; // Replace with the arguments for the function
+        const functionArgumentsForrewardItem = [req.user.address]; // Replace with the arguments for the function
         var isRewarded
         try {
             isRewarded = await Transaction.runWritingFunction(functionNameForrewardItem, functionArgumentsForrewardItem)
@@ -290,7 +290,6 @@ class ContractController {
             certMinted: result,
             success: true,
             reward: isRewarded,
-
         })
 
 
