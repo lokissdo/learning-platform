@@ -1,7 +1,16 @@
 const router = require("express").Router();
 const courseController = require("../controller/CourseController");
+const { authorizeUser } = require("../middleware/AuthMiddleware");
+
+
+router.use(authorizeUser);
 
 router.post("/addcourse", courseController.addCourse);
-router.get("/view", courseController.getDetails);
+router.get("/data/:courseID", courseController.getDetails);
+
+router.get('/download_course/:courseID',courseController.download);
+router.get('/view/:courseID', courseController.viewCoursePage);
+router.get('/earn_cert/:courseID', courseController.earnCertPage);
+
 
 module.exports = router;

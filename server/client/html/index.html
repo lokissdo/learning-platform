@@ -108,64 +108,28 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MetaMask Transaction Example</title>
+  <title>Learning Platform</title>
+   <!-- <script src="https://cdn.ethers.io/dist/ethers.min.js"></script> -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+     crossorigin="anonymous"></script>
+   <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+ 
 </head>
+
 <body>
-  <!-- <script src="https://cdn.ethers.io/dist/ethers.min.js"></script> -->
-  <script src="CourseOpeningContract.js"></script>
-  <!-- <script type="module">
-    import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
-    // Your code here...
-</script> -->
-<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+  <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <button type="button" class="btn btn-primary" onclick="login()">Login with Metamask</button>
 
-  <script>
-    // Replace this with your contract's ABI and address
+</div>
+  <script src="../js/index.js"></script>
 
-
-    // Connect to the Ethereum network using MetaMask's provider
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    // const provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com');
-    // Create a contract instance
-    const contract = new ethers.Contract(courseOpeningContractAddress, courseOpeningContractABI, provider);
-
-    async function sendTransaction() {
-      try {
-        // Request user's permission to connect to their MetaMask account
-        await window.ethereum.enable();
-
-        // Get the signer (user's Ethereum account)
-        const signer = provider.getSigner();
-        
-        // Replace 'yourFunctionName' and 'functionArguments' with actual values
-        const functionName = 'buyCourse';
-        const functionArguments = [Number(125)]; // Your function arguments
-        let ids = await contract.getAllCourseIDs()
-        console.log(ids)
-        // Encode the transaction data
-        // const txData = contract.interface.encodeFunctionData(functionName, functionArguments);
-        const txData =  contract.interface.encodeFunctionData('buyCourse', [125]);
-        console.log(contract)
-
-
-        // Create the transaction object
-        const tx = {
-          to: courseOpeningContractAddress,
-          data: txData,
-          value:123322
-        };
-
-        // Send the transaction and wait for the result
-        const txResponse = await signer.sendTransaction(tx);
-        console.log('Transaction sent:', txResponse);
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    }
-  </script>
-  <button onclick="sendTransaction()">Send Transaction</button>
 </body>
+
 </html>

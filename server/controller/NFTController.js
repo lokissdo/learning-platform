@@ -6,15 +6,15 @@ const User = require("../model/User");
 const NFTController = {
     addNFT: async (req, res, next) => {
         
-        if (!req.body.courseId || !req.body.uri) {
+        if (!req.body.courseID || !req.body.uri) {
             next({
                 invalidFields: true,
                 message: "Missing fields."
             });
             return;
         }
-console.log(req.body)
-        const courseDetails = await Course.findOne({_id: req.body.courseId}).exec();
+        console.log(req.body)
+        const courseDetails = await Course.findOne({_id: req.body.courseID}).exec();
         if (!courseDetails){
             res.json({
                 error:'Course does not exist'
@@ -36,7 +36,7 @@ console.log(req.body)
                 image: "[image url]",
                 externalUrl: "[website to learn more about the NFT]",
                 attributes: [
-                    {traitType: "course", value: {id: req.body.courseId, courseName: courseDetails.courseName}},
+                    {traitType: "course", value: {id: req.body.courseID, courseName: courseDetails.courseName}},
                     {traitType: "lecturer", value: lecturer}
                 ]
             }

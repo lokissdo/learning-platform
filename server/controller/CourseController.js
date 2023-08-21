@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const Course = require("../model/Course");
 const userController = require("./UserController");
-
+const ContractController = require("./ContractController");
+const path = require('path');
 const CourseController = {
     addCourse: async (req, res, next) => {
         if (!req.body.courseName || !req.body.lecturer || !req.body.price) {
@@ -38,8 +39,22 @@ const CourseController = {
     },
 
     getDetails: async (req, res, next) => {
+        console.log(req.params.courseID)
+        if(!ContractController.ownsNFTForCourse(req.user.address,req.params.courseID)) {
+            next({err:'not own this course'})
+            return;
+        }
         try {
-            const courseDetails = await Course.find(req.body);
+            const courseDetails = await Course.findOne({ _id: req.params.courseID })
+                .populate('lecturer', '_id userName email'); // Specify the fields you want to populate from the User model
+    
+            if (!courseDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Course not found"
+                });
+            }
+    
             res.status(200).json({
                 success: true,
                 courseDetails: courseDetails
@@ -47,11 +62,34 @@ const CourseController = {
         } catch (err) {
             next({
                 success: false,
-                message: "Couldn't find user name",
+                message: "Couldn't fetch course details",
                 error: err
             });
+        }
+    },
+    async download(req, res, next){
+        if(!ContractController.ownsNFTForCourse(req.user.address,req.params.courseID)) {
+            next({err:'not own this course'})
             return;
         }
+        let course = await Course.findOne({_id:req.params.courseID})
+        const pdfPath = path.join(__dirname, `../File/${req.params.courseID}.pdf`);
+        res.download(pdfPath, `${course.courseName}.pdf`);
+        
+    },
+    async viewCoursePage(req, res, next){
+        let isValid = await ContractController.ownsNFTForCourse(req.user.address,req.params.courseID)
+        console.log(isValid)
+        if(!isValid) {
+            next('not own this course')
+            return;
+        }
+        console.log('here')
+        res.sendFile(path.resolve(__dirname, '../client/html', 'course.html'));
+
+    },
+    async earnCertPage(req,res,next){
+        res.sendFile(path.resolve(__dirname, '../client/html', 'game.html'));
     }
 }
 

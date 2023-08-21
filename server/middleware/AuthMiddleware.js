@@ -4,6 +4,7 @@ const ethUtil = require('ethereumjs-util');
 
 var AuthMiddleware = {
     authorizeUser: function(req, res, next) {
+        console.log(req.cookies.token)
         data = tokenHelper.getDataFromToken(req.cookies.token)
         console.log('middleware',data.user,'\n')
         if (data === 0 || !data.user )

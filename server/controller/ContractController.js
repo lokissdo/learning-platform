@@ -5,7 +5,7 @@ const CourseController = require("./CourseController");
 const NFTController = require("./NFTController");
 const QuestionController = require("./QuestionController");
 
-class TestController {
+class ContractController {
     async getTotalCourses(req, res, next) {
         const totalCourses = await Transaction.runReadingFunction('getTotalCourses', []);
         res.json({
@@ -20,8 +20,8 @@ class TestController {
         // const isValidCourse = CourseController.addCourse(req,res,next);
         // if(!isValidCourse) return;
         const course = {
-            courseID: '123',
-            price: Number(3000), // Example price in wei (1 ether)
+            courseID: req.body.courseID,
+            price: req.body.price, // Example price in wei (1 ether)
         };
 
         var result = await Transaction.runWritingFunction("addCourse", [course])
@@ -192,19 +192,15 @@ class TestController {
             success: true
         })
     }
-    async ownsNFTForCourse(req, res, next) {
+    async ownsNFTForCourse(userAddress, courseID) {
         const functionName = 'ownsNFTForCourse'; // Replace with the name of the function you want to call
-        const functionArguments = ['0x2d89266fCf02dD5ac8387fBcb3A786eFcE0F48E9', 125]; // Replace with the arguments for the function
+        const functionArguments = [userAddress, courseID]; // Replace with the arguments for the function
 
         let result = await Transaction.runReadingFunction(functionName, functionArguments)
         result = JSON.parse(JSON.stringify(result, (key, value) =>
             typeof value === "bigint" ? value.toString() : value
         ));
-        res.json({
-            message: '....',
-            res: result,
-            success: true
-        })
+        return result
     }
     async getURIToken(req, res, next) {
         const functionName = 'tokenURI'; // Replace with the name of the function you want to call
@@ -275,7 +271,7 @@ class TestController {
             { type: "uint256", name: "tokenID" },
         ];
         if (result)
-        result = await Transaction.getEventDataFromTransactionHash(result.transactionHash, "NFTMinted(string,address,uint256)", inputs)
+            result = await Transaction.getEventDataFromTransactionHash(result.transactionHash, "NFTMinted(string,address,uint256)", inputs)
 
         const inputsReward = [
             { type: "address", name: "to" },
@@ -283,9 +279,9 @@ class TestController {
             { type: "uint256", name: "tokenId" },
         ];
         if (isRewarded)
-        isRewarded = await Transaction.getEventDataFromTransactionHash(isRewarded.transactionHash, "RewardItem(address,string,uint256)", inputsReward)
-        ;
-        
+            isRewarded = await Transaction.getEventDataFromTransactionHash(isRewarded.transactionHash, "RewardItem(address,string,uint256)", inputsReward)
+                ;
+
         // let eventDataForRw =  Transaction.getEventDataFromTransactionHash(isRewarded.transactionHash)
         // console.log(eventDataForRw)
 
@@ -333,8 +329,25 @@ class TestController {
     }
     async setURIToken(req, res, next) {
         //check auth
+        if (!this.ownsNFTForCourse(req.user.address, req.body.courseID)) {
+            res.json({
+                message: '....',
+                res: 'Not valid for set URI request',
+                success: false
+            })
+            return
+        }
         NFTController.addNFT(req, res, next)
+    }
+    async getEventData(req,res,next){        
+        let eventDataForMint = await Transaction.getEventDataFromTransactionHash(req.body.transactionHash, req.body.formattedEvent, req.body.inputs)
+        console.log(eventDataForMint)
+        res.json({
+            message: '....',
+            res: eventDataForMint,
+            success: true
+        })
     }
 }
 
-module.exports = new TestController;
+module.exports = new ContractController;

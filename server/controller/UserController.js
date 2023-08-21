@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../model/User.js");
 const { UserRoleEnum, UserStatusEnum } = require("../constants/Enum.js");
 const Signature = require("../Helper/Signature.js");
-
+const jwt = require('jsonwebtoken')
 const UserController = {
     // Add a user to database
     addUser: async (req, res, next) => {
@@ -105,7 +105,58 @@ const UserController = {
         }
     },
 
+    // async login(req, res, next) {
+    //     if (!req.body.address || !req.body.message || !req.body.signature) {
+    //         next({
+    //             success: false,
+    //             message: "Invalid fields",
+    //             invalidFields: true
+    //         })
+    //         return;
+    //     }
+    //     if (!Signature.verify(req.body.address, req.body.message, req.body.signature)) {
+    //         next({
+    //             success: false,
+    //             message: "Signature not valid",
+    //         })
+    //         return;
+    //     }
+    //     const user = await User.findOne({ walletAccount: req.body.address })
+
+    //     console.log(user);
+    //     if (!user) {
+    //         res.send({ success: false, message: "You need to signup first" });
+    //         return
+    //     }
+    //     try {
+    //         const token = jwt.sign({
+    //             user: {
+    //                 email: user.email,
+    //                 userId: user._id,
+    //                 address: user.walletAccount,
+    //                 role: user.role
+    //             },
+    //         },
+    //             process.env.SECRET_KEY_TOKEN,
+    //             {
+    //                 expiresIn: "80h"
+    //             }
+    //         );
+    //         res.cookie('token', token, {
+    //             expires: new Date(Date.now() + 80 * 3600)
+    //         })
+    //         res.send({
+    //             success: true,
+    //             message: "sucessfully",
+    //             user: user
+    //         })
+    //     } catch (err) {
+    //         next(err);
+    //     }
+    //     return;
+    // }
     async login(req, res, next) {
+        console.log(req.body)
         if (!req.body.address || !req.body.message || !req.body.signature) {
             next({
                 success: false,
@@ -114,36 +165,18 @@ const UserController = {
             })
             return;
         }
-        if (!Signature.verify(req.body.address, req.body.message, req.body.signature)) {
+        if (!Signature.verify( req.body.message, req.body.signature,req.body.address)) {
             next({
                 success: false,
                 message: "Signature not valid",
             })
             return;
         }
-        const user = await User.findOne({ walletAccount: req.body.address })
 
-        console.log(user);
-        if (!user) {
-            res.send({ success: false, message: "You need to signup first" });
-            return
-        }
-        try {
-            let check = await bcrypt.compare(req.body.password, user.password)
-            if (!check) {
-                res.send({
-                    success: false,
-                    message: "wrong information",
-                    wrongInformation: true,
-                });
-                return
-            }
+        try{
             const token = jwt.sign({
                 user: {
-                    email: user.email,
-                    userId: user._id,
-                    address: user.walletAccount,
-                    role: user.role
+                    address: req.body.address,
                 },
             },
                 process.env.SECRET_KEY_TOKEN,
@@ -157,9 +190,9 @@ const UserController = {
             res.send({
                 success: true,
                 message: "sucessfully",
-                user: user
             })
         } catch (err) {
+            console.log(err)
             next(err);
         }
         return;
