@@ -144,8 +144,20 @@
   <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
     onclick="toggleForm('openCourseForm')">Open Course</button>
 
-  <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
-    onclick="toggleForm('earnCertificateForm')">Earn Certificate</button>
+  <!--<button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
+    onclick="toggleForm('earnCertificateForm')">Earn Certificate</button>-->
+  <button type="button" class="btn btn-primary m-3 action-button" id="game" data-bs-toggle="modal" data-bs-target="#myModal">Earn Certificate</button>
+
+  <script>
+      // Get a reference to the button
+      var button = document.getElementById('game');
+
+      // Add a click event listener to the button
+      button.addEventListener('click', function() {
+          // Redirect to another HTML file
+          window.location.href = 'html/game.html';
+      });
+  </script>
 
   <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
     onclick="toggleForm('viewDetailForm')">View Detail Course</button>
