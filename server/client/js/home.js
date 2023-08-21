@@ -98,11 +98,21 @@ async function buyCourse() {
     console.log(eventDataForMint)
     eventDataForMint = eventDataForMint.res
   
-  
+    
+    
     showMessage(`Successfull buy <ul> <li>Course id: ${eventDataForMint.courseID}</li>
   <li>Value: ${eventDataForMint.value}</li>
     <li>NFT TokenID  id: ${eventDataForMint.tokenID}</li></ul>`)
-  
+    let res = await fetch("/api/contract/set_uri", {
+      method: "POST",
+      body: JSON.stringify({
+        courseID,
+        uri:`conft/${eventDataForMint.tokenID}`
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8"
+      }
+    })
     closeModal();
   }, 10000);
   
@@ -143,6 +153,8 @@ function getTokenURI() {
   const tokenID = document.getElementById('tokenID').value;
   const openingCourseNFT = document.getElementById('openingCourseNFT').checked;
   const certificateNFT = document.getElementById('certificateNFT').checked;
+  let prefix = openingCourseNFT ? 'conft':'ccnft'
+  showMessage(`<a href='./metadata/${prefix}/${tokenID}'>TOKEN URI </a>`)
   console.log('Get Token URI:', tokenID, 'Opening Course NFT:', openingCourseNFT, 'Certificate NFT:', certificateNFT);
   closeModal();
 }

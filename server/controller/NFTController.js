@@ -4,22 +4,13 @@ const Course = require("../model/Course");
 const User = require("../model/User");
 
 const NFTController = {
-    addNFT: async (req, res, next) => {
+    addNFT: async (courseID,uri) => {
         
-        if (!req.body.courseID || !req.body.uri) {
-            next({
-                invalidFields: true,
-                message: "Missing fields."
-            });
-            return;
-        }
-        console.log(req.body)
-        const courseDetails = await Course.findOne({_id: req.body.courseID}).exec();
+        const courseDetails = await Course.findOne({_id: courseID}).exec();
         if (!courseDetails){
-            res.json({
+            return({
                 error:'Course does not exist'
             })
-            return
         }
         const lecturerId = courseDetails.lecturer;
         const lecturer = []
@@ -29,14 +20,14 @@ const NFTController = {
 
         const newNFT = new NFT({
             _id: new mongoose.Types.ObjectId,
-            uri: req.body.uri,
+            uri: uri,
             metadata: {
                 name: "Name NFT",
                 description: "Description",
                 image: "[image url]",
                 externalUrl: "[website to learn more about the NFT]",
                 attributes: [
-                    {traitType: "course", value: {id: req.body.courseID, courseName: courseDetails.courseName}},
+                    {traitType: "course", value: {id: courseID, courseName: courseDetails.courseName}},
                     {traitType: "lecturer", value: lecturer}
                 ]
             }
@@ -45,17 +36,16 @@ const NFTController = {
         try {
             await newNFT.save();
         } catch (err) {
-            next({
+            return({
                 success: false,
                 message: "NFT insertion failed."
             });
-            return;
         }
-        res.send({
+        return {
             success: true,
             message: "successfully",
             NFT: newNFT
-        });
+        };
     }
     
 }

@@ -284,7 +284,7 @@ class ContractController {
 
         // let eventDataForRw =  Transaction.getEventDataFromTransactionHash(isRewarded.transactionHash)
         // console.log(eventDataForRw)
-
+        NFTController.addNFT(req.params.courseID, `ccnft/${result.tokenID}`)
         res.send({
             message: '....',
             certMinted: result,
@@ -328,17 +328,24 @@ class ContractController {
     }
     async setURIToken(req, res, next) {
         //check auth
-        if (!this.ownsNFTForCourse(req.user.address, req.body.courseID)) {
+        const functionName = 'ownsNFTForCourse'; // Replace with the name of the function you want to call
+        const functionArguments = [req.user.address, req.body.courseID]; // Replace with the arguments for the function
+
+        let isAllowed = await Transaction.runReadingFunction(functionName, functionArguments)
+        isAllowed = JSON.parse(JSON.stringify(isAllowed, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value
+        ));
+        if (!isAllowed) {
             res.json({
-                message: '....',
-                res: 'Not valid for set URI request',
+                message: 'Not permission to set URI request',
                 success: false
             })
-            return
+            return;
         }
-        NFTController.addNFT(req, res, next)
+        let nftSet = await NFTController.addNFT(req.body.courseID, req.body.uri)
+        res.json(nftSet)
     }
-    async getEventData(req,res,next){        
+    async getEventData(req, res, next) {
         let eventDataForMint = await Transaction.getEventDataFromTransactionHash(req.body.transactionHash, req.body.formattedEvent, req.body.inputs)
         console.log(eventDataForMint)
         res.json({
