@@ -107,6 +107,7 @@ const QuestionController = {
                 e.content.answer = e.content.answer.at(0)
                 return e.content
             });
+            console.log(formattedRes)
             return formattedRes;
         } catch (error) {
             throw error;

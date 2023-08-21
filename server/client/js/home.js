@@ -24,7 +24,7 @@ const Transaction = {
       })
         // Converting to JSON
         .then(response => response.json())
-       return res
+      return res
     } catch (error) {
       console.error(error);
       return error; // Rethrow the error to handle it at a higher level
@@ -47,23 +47,30 @@ const Transaction = {
       const tx = {
         to: courseOpeningContractAddress,
         data: txData,
-        value: value
+        value: Number(value)
       };
 
       // Send the transaction and wait for the result
       const txResponse = await signer.sendTransaction(tx);
       console.log('Transaction sent:', txResponse);
-      return txResponse
+      return {
+        res:txResponse,
+        success:true
+      }
     } catch (error) {
       console.error('Error:', error);
-      return false
+      return {
+        res:error,
+        success:false
+      }
     }
   }
 }
 
 
 function toggleForm(formId) {
-  const forms = ["buyCourseForm", "fundContractForm", "withdrawContractForm", "openCourseForm", "earnCertificateForm", "viewDetailForm", "getTokenURIForm"];
+  const forms = ["buyCourseForm", "fundContractForm", "withdrawContractForm",
+    "openCourseForm", "earnCertificateForm", "viewDetailForm", "getTokenURIForm", "setMinterForm", "mintBatchForm", "getBoughtCourse"];
   forms.forEach(form => {
     document.getElementById(form).style.display = "none";
   });
@@ -81,9 +88,9 @@ async function buyCourse() {
   const functionName = 'buyCourse'; // Replace with the name of the function you want to call
   const functionArguments = [courseID]; // Replace with the arguments for the function
   let result = await Transaction.sendTransaction(functionName, functionArguments, 20)
-  if (!result) { 
+  if (!result.success) {
     console.log('invalid transaction')
-    return; 
+    return;
   }
   console.log(result)
   const inputs = [
@@ -92,14 +99,14 @@ async function buyCourse() {
     { type: "uint256", name: "value" },
     { type: "uint256", name: "tokenID" }
   ];
-  setTimeout(async()=>{
-    console.log(result.hash)
-    let eventDataForMint = await Transaction.getEventDataFromTransactionHash(result.hash, "CourseBought(string,address,uint256,uint256)", inputs)
+  setTimeout(async () => {
+    console.log(result.res.hash)
+    let eventDataForMint = await Transaction.getEventDataFromTransactionHash(result.res.hash, "CourseBought(string,address,uint256,uint256)", inputs)
     console.log(eventDataForMint)
     eventDataForMint = eventDataForMint.res
-  
-    
-    
+
+
+
     showMessage(`Successfull buy <ul> <li>Course id: ${eventDataForMint.courseID}</li>
   <li>Value: ${eventDataForMint.value}</li>
     <li>NFT TokenID  id: ${eventDataForMint.tokenID}</li></ul>`)
@@ -107,7 +114,7 @@ async function buyCourse() {
       method: "POST",
       body: JSON.stringify({
         courseID,
-        uri:`conft/${eventDataForMint.tokenID}`
+        uri: `conft/${eventDataForMint.tokenID}`
       }),
       headers: {
         "Content-type": "application/json; charset=UTF-8"
@@ -115,17 +122,103 @@ async function buyCourse() {
     })
     closeModal();
   }, 10000);
-  
+
 }
 
-function fundContract() {
+async function fundContract() {
   const amount = document.getElementById('amountFund').value;
-  console.log('Fund CourseOpening Contract:', amount);
+  const functionName = 'fundContract'; // Replace with the name of the function you want to call
+  const functionArguments = []; // Replace with the arguments for the function
+  try {
+    let result = await Transaction.sendTransaction(functionName, functionArguments, amount)
+    console.log(result)
+    if (result.success) showMessage(amount + "has been funded")
+
+         else showMessage(result.res.data.message)
+
+  } catch (err) {
+    console.log(err)
+    showMessage(err.data.message)
+  }
   closeModal();
 }
 
-function withdrawContract() {
+
+async function setMinter() {
+  const addressOfMinter = document.getElementById('addressOfMinter').value;
+  console.log('addressOfMinter:', addressOfMinter);
+
+  const functionName = 'grantMinterRole'; // Replace with the name of the function you want to call
+  const functionArguments = [addressOfMinter]; // Replace with the arguments for the function
+  try {
+    let result = await Transaction.sendTransaction(functionName, functionArguments)
+    console.log(result)
+    if(result.success)
+    showMessage("Minter has set")
+    
+    else showMessage(result.res.data.message)
+  } catch (err) {
+    console.log(err)
+
+  }
+  closeModal();
+}
+
+
+async function getBoughtCourse() {
+  let courseIDs = await contract.getAllCourseIDs()
+  let courseBoughts = []
+  const userAddress = window.ethereum.selectedAddress;
+  for (let index = 0; index < courseIDs.length; index++) {
+    const element = courseIDs[index];
+    let isBought = await contract.ownsNFTForCourse(userAddress, element)
+    if (isBought) courseBoughts.push(element)
+  }
+  console.log(courseBoughts)
+  let html = courseBoughts.map(e => `<li>${e}</li>`)
+  html = '<ul>' + html + '</ul>'
+  showMessage("Courses: " + html)
+  closeModal();
+}
+
+
+async function mintBatch() {
+  const numberOfNFT = document.getElementById('numberOfNFT').value;
+  const functionName = 'mintBatch'; // Replace with the name of the function you want to call
+  const functionArguments = [numberOfNFT]; // Replace with the arguments for the function
+  try {
+    let result = await Transaction.sendTransaction(functionName, functionArguments)
+    console.log(result)
+
+    if(result.success)
+    showMessage(numberOfNFT + "  has been minted")
+    else showMessage(result.res.data.message)
+  } catch (err) {
+    console.log(err)
+    showMessage(numberOfNFT + " has not yet been minted")
+
+  }
+  closeModal();
+}
+
+async function withdrawContract() {
   const amount = document.getElementById('amountWithdraw').value;
+
+  const functionName = 'withDrawFunds'; // Replace with the name of the function you want to call
+  const functionArguments = [amount]; // Replace with the arguments for the function
+  try {
+    let result = await Transaction.sendTransaction(functionName, functionArguments)
+    console.log(result)
+    if (result.success)
+      showMessage(amount + " has been withdrawed")
+         else showMessage(result.res.data.message)
+
+  } catch (err) {
+    console.log("heee",err)
+    showMessage(amount + " has been not withdrawed")
+
+  }
+
   console.log('Withdraw CourseOpening Contract:', amount);
   closeModal();
 }
@@ -153,7 +246,7 @@ function getTokenURI() {
   const tokenID = document.getElementById('tokenID').value;
   const openingCourseNFT = document.getElementById('openingCourseNFT').checked;
   const certificateNFT = document.getElementById('certificateNFT').checked;
-  let prefix = openingCourseNFT ? 'conft':'ccnft'
+  let prefix = openingCourseNFT ? 'conft' : 'ccnft'
   showMessage(`<a href='./metadata/${prefix}/${tokenID}'>TOKEN URI </a>`)
   console.log('Get Token URI:', tokenID, 'Opening Course NFT:', openingCourseNFT, 'Certificate NFT:', certificateNFT);
   closeModal();

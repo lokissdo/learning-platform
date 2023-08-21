@@ -19,6 +19,15 @@
    <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
 </head>
 
+<style>
+   body {
+   background: url("https://wallpaperaccess.com/full/3648396.jpg") no-repeat center center fixed;
+   background-size: 100% 100%;
+   height: 100%;
+   position: absolute;
+   width: 100%;
+ }
+</style>
 <body>
 
   <div class="modal" tabindex="-1" id="myModal">
@@ -66,6 +75,36 @@
                 <input type="text" class="form-control" id="courseIDOpen" placeholder="Enter Course ID">
               </div>
               <button type="button" class="btn btn-primary" onclick="openCourse()">Open Course</button>
+            </form>
+          </div>
+
+          <div id="getBoughtCourse" style="display: none;">
+            <form>
+              <div class="mb-3">
+                <label  class="form-label">Get All Bought Courses </label>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="getBoughtCourse()">getBoughtCourse</button>
+            </form>
+          </div>
+
+          <div id="mintBatchForm" style="display: none;">
+            <form>
+              <div class="mb-3">
+                <label for="numberOfNFT" class="form-label">Number Of NFT</label>
+                <input type="text" class="form-control" id="numberOfNFT" placeholder="Enter Number Of NFT">
+              </div>
+              <button type="button" class="btn btn-primary" onclick="mintBatch()">Mint Batch</button>
+            </form>
+          </div>
+
+
+          <div id="setMinterForm" style="display: none;">
+            <form>
+              <div class="mb-3">
+                <label for="addressOfMinter" class="form-label">Address Of Minter</label>
+                <input type="text" class="form-control" id="addressOfMinter" placeholder="Enter Address Of Minter">
+              </div>
+              <button type="button" class="btn btn-primary" onclick="setMinter()">Mint Batch</button>
             </form>
           </div>
           
@@ -144,26 +183,23 @@
   <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
     onclick="toggleForm('openCourseForm')">Open Course</button>
 
-  <!--<button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
-    onclick="toggleForm('earnCertificateForm')">Earn Certificate</button>-->
-  <button type="button" class="btn btn-primary m-3 action-button" id="game" data-bs-toggle="modal" data-bs-target="#myModal">Earn Certificate</button>
+  <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
+    onclick="toggleForm('earnCertificateForm')">Earn Certificate</button>
 
-  <script>
-      // Get a reference to the button
-      var button = document.getElementById('game');
-
-      // Add a click event listener to the button
-      button.addEventListener('click', function() {
-          // Redirect to another HTML file
-          window.location.href = 'html/game.html';
-      });
-  </script>
 
   <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
     onclick="toggleForm('viewDetailForm')">View Detail Course</button>
 
   <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
     onclick="toggleForm('getTokenURIForm')">Get Token URI for NFT</button>
+
+    <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
+    onclick="toggleForm('setMinterForm')">Set Minter</button>
+
+    <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
+    onclick="toggleForm('mintBatchForm')">Mint Batch</button>
+    <button type="button" class="btn btn-primary m-3 action-button" data-bs-toggle="modal" data-bs-target="#myModal"
+    onclick="toggleForm('getBoughtCourse')">Get Bought Courses</button>
 </div>
   
 

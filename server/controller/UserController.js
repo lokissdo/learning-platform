@@ -185,7 +185,7 @@ const UserController = {
                 }
             );
             res.cookie('token', token, {
-                expires: new Date(Date.now() + 80 * 3600)
+                expires: new Date(Date.now() + 80 * 360000)
             })
             res.send({
                 success: true,

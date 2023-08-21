@@ -75,7 +75,7 @@ class ContractController {
         // }
 
         console.log(req.params)
-        let questions = await QuestionController.getRandomQuestions(req.params.courseID, 20)
+        let questions = await QuestionController.getRandomQuestions(req.params.courseID, 1)
         res.json(questions)
     }
 
@@ -170,7 +170,7 @@ class ContractController {
     async mintBatch(req, res, next) {
 
         const functionName = 'mintBatch'; // Replace with the name of the function you want to call
-        const functionArguments = [1]; // Replace with the arguments for the function
+        const functionArguments = [2]; // Replace with the arguments for the function
         console.log('hwre')
         let result = await Transaction.runWritingFunction(functionName, functionArguments)
         res.json({
