@@ -6,6 +6,12 @@
 
 const router = require("express").Router();
 const contractController = require("../controller/ContractController");
+const { authorizeUser } = require("../middleware/AuthMiddleware");
+
+
+
+router.use(authorizeUser)
+
 
 router.get('/get_courses',contractController.getTotalCourses);
 router.get('/add_course',contractController.addCourse);
